@@ -101,7 +101,13 @@ chmod +x /usr/local/bin/minikube || true
 curl -sS https://webinstall.dev/k9s | bash || true
 # Move k9s to global path if installed locally
 if [ -f "$HOME/.local/bin/k9s" ]; then
-    mv -f "$HOME/.local/bin/k9s" /usr/local/bin/
+    # If /usr/local/bin/k9s exists, back it up before overwriting
+    if [ -f /usr/local/bin/k9s ]; then
+        echo "Warning: /usr/local/bin/k9s already exists. Backing up to /usr/local/bin/k9s.bak.$(date +%s)"
+        cp /usr/local/bin/k9s /usr/local/bin/k9s.bak.$(date +%s)
+    fi
+    # Overwrite is intentional to ensure latest version is globally accessible
+    mv "$HOME/.local/bin/k9s" /usr/local/bin/
 fi
 
 # trivy
