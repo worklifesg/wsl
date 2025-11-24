@@ -68,11 +68,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:PutObject
-                  - s3:GetObject
                   - s3:ListBucket
                 Resource:
                   - !GetAtt ArtifactsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
                   - !Sub "${ArtifactsBucket.Arn}/*"
 
 Outputs:
