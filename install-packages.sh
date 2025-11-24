@@ -52,7 +52,7 @@ GO_VER=1.23.9
 wget -q https://go.dev/dl/go${GO_VER}.linux-amd64.tar.gz -O /tmp/go.tar.gz
 rm -rf /usr/local/go
 tar -C /usr/local -xzf /tmp/go.tar.gz
-# Overwrite /etc/profile.d/go.sh to ensure idempotency; using '>' avoids duplicate entries if the script is run multiple times.
+# Overwrite /etc/profile.d/go.sh to ensure idempotency. Using '>' avoids duplicate entries if the script is run multiple times.
 echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
 chmod +x /etc/profile.d/go.sh
 
