@@ -51,7 +51,6 @@ wget -q https://go.dev/dl/go${GO_VER}.linux-amd64.tar.gz -O /tmp/go.tar.gz
 rm -rf /usr/local/go
 tar -C /usr/local -xzf /tmp/go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
-chmod +x /etc/profile.d/go.sh
 
 # -------------------------
 # Java & Rust & Python
@@ -65,8 +64,8 @@ python3 -m pip install --upgrade pip setuptools wheel || true
 # Web dev tools
 # -------------------------
 echo "Installing Web Dev tools..."
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-  . "$NVM_DIR/nvm.sh"
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  . "$HOME/.nvm/nvm.sh"
   npm install -g yarn pnpm typescript vite webpack webpack-cli || true
 fi
 curl -fsSL https://code-server.dev/install.sh | sh || true
@@ -98,7 +97,7 @@ chmod +x /usr/local/bin/minikube || true
 curl -sS https://webinstall.dev/k9s | bash || true
 # Move k9s to global path if installed locally
 if [ -f "$HOME/.local/bin/k9s" ]; then
-    mv "$HOME/.local/bin/k9s" /usr/local/bin/
+    mv -f "$HOME/.local/bin/k9s" /usr/local/bin/
 fi
 
 # trivy
