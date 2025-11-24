@@ -21,13 +21,23 @@ Option 1 — CloudFormation:
 
 ```bash
 aws cloudformation deploy --template-file cloudformation/pipeline.yml --stack-name wsl-image-pipeline \
-  --parameter-overrides GitHubOwner=you GitHubRepo=wsl-custom GitHubBranch=main GitHubToken=ghp_xxx ReleaseBucketName=my-wsl-images
+  --parameter-overrides GitHubOwner=your-github-username GitHubRepo=your-repo-name GitHubBranch=main GitHubToken=ghp_YOUR_TOKEN ReleaseBucketName=my-wsl-images
 ```
 
 3. Pipeline will produce `custom-wsl-<DATE>-<BUILD>.tar.gz` and `custom-wsl-latest.tar.gz` in the Release Bucket (if specified).
 
-Option 2 — GitHub Actions:
-- Add AWS secrets (S3 bucket, credentials) and push to `main`; workflow builds and uploads artifact.
+Option 2 — GitHub Actions (OIDC):
+1. Deploy the OIDC setup stack to create the S3 bucket and IAM role:
+   ```bash
+   aws cloudformation deploy --template-file cloudformation/github-oidc-setup.yml --stack-name wsl-oidc-setup \
+     --capabilities CAPABILITY_NAMED_IAM --parameter-overrides GitHubOrg=your-github-org GitHubRepo=your-repo-name
+   ```
+2. Note the `RoleArn` and `BucketName` from the stack outputs.
+3. Add the following secrets to your GitHub repository:
+   - `AWS_ROLE_ARN`: The Role ARN from step 2.
+   - `S3_BUCKET`: The Bucket Name from step 2.
+   - `AWS_REGION`: Your AWS region (e.g., `us-east-1`).
+4. Push to `main` (or `develop`) to trigger the build. The workflow uses OIDC for secure, temporary credentials.
 
 ## Import on Windows:
 Use `windows/import-and-setup.ps1` to download & import. You can specify a version (default is "latest").

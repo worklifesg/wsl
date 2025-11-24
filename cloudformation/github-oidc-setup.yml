@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Setup OIDC for GitHub Actions and S3 Bucket for Artifacts'
+Parameters:
+  GitHubOrg:
+    Type: String
+    Description: "GitHub Organization or Username (e.g. worklifesg)"
+  GitHubRepo:
+    Type: String
+    Description: "GitHub Repository Name (e.g. wsl)"
+  OIDCProviderArn:
+    Type: String
+    Description: "Arn of existing OIDC Provider for GitHub. Leave empty to create a new one."
+    Default: ""
+
+Conditions:
+  CreateOIDCProvider: !Equals [!Ref OIDCProviderArn, ""]
+
+Resources:
+  # S3 Bucket to store the build artifacts
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # OIDC Provider (Create only if Arn not provided)
+  GithubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+
+  # IAM Role for GitHub Actions
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "github-actions-${GitHubRepo}-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If [CreateOIDCProvider, !Ref GithubOidcProvider, !Ref OIDCProviderArn]
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:*"
+                token.actions.githubusercontent.com:aud: "sts.amazonaws.com"
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt ArtifactsBucket.Arn
+                  - !Sub "${ArtifactsBucket.Arn}/*"
+
+Outputs:
+  RoleArn:
+    Description: "Arn of the IAM Role to use in GitHub Actions"
+    Value: !GetAtt GitHubActionsRole.Arn
+  BucketName:
+    Description: "Name of the S3 Bucket created"
+    Value: !Ref ArtifactsBucket

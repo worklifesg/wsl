@@ -6,9 +6,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Install debootstrap & tar
         run: sudo apt-get update && sudo apt-get install -y debootstrap tar xz-utils
@@ -23,13 +32,7 @@ jobs:
           cp custom-wsl-${IMAGE_TAG}.tar.gz custom-wsl-latest.tar.gz
 
       - name: Upload artifact to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl private
-        env:
-          AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: './'
-          DEST_DIR: '' # Upload to root of bucket
+        run: |
+          aws s3 cp custom-wsl-${IMAGE_TAG}.tar.gz s3://${{ secrets.S3_BUCKET }}/
+          aws s3 cp custom-wsl-latest.tar.gz s3://${{ secrets.S3_BUCKET }}/
+
