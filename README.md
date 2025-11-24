@@ -33,6 +33,9 @@ Option 2 — GitHub Actions (OIDC):
      --capabilities CAPABILITY_NAMED_IAM --parameter-overrides GitHubOrg=your-github-org GitHubRepo=your-repo-name
    ```
 2. Note the `RoleArn` and `BucketName` from the stack outputs.
+   You can retrieve these values using the AWS CLI:
+   ```bash
+   aws cloudformation describe-stacks --stack-name wsl-oidc-setup --query 'Stacks[0].Outputs'
 3. Add the following secrets to your GitHub repository:
    - `AWS_ROLE_ARN`: The Role ARN from step 2.
    - `S3_BUCKET`: The Bucket Name from step 2.
