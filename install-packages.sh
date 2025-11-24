@@ -18,7 +18,7 @@ if [ -f /root/packages.txt ]; then
 fi
 
 echo "Installing packages: $PACKAGES"
-apt-get install -y "$PACKAGES"
+apt-get install -y $PACKAGES
 
 # Locale generation
 echo "Generating locales..."
