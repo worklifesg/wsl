@@ -39,8 +39,10 @@ echo "Installing NVM and Node.js..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash || true
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm install 22 || true
-nvm alias default 22 || true
+if command -v nvm >/dev/null 2>&1; then
+  nvm install 22 || true
+  nvm alias default 22 || true
+fi
 
 # -------------------------
 # Go
