@@ -1,0 +1,32 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+    commands:
+      - echo "Installing prerequisites"
+      - apt-get update -y
+      - apt-get install -y debootstrap tar xz-utils sudo
+  build:
+    commands:
+      - echo "Starting build"
+      - bash build.sh
+  post_build:
+    commands:
+      - echo "Build completed"
+      - export IMAGE_TAG="$(date +%Y%m%d)-${CODEBUILD_BUILD_NUMBER:-local}"
+      - echo "Tagging image as $IMAGE_TAG"
+      - mv custom-wsl.tar.gz custom-wsl-${IMAGE_TAG}.tar.gz
+      - |
+        if [ -n "$RELEASE_BUCKET" ]; then
+          echo "Uploading to release bucket: $RELEASE_BUCKET"
+          aws s3 cp custom-wsl-${IMAGE_TAG}.tar.gz s3://$RELEASE_BUCKET/
+          aws s3 cp custom-wsl-${IMAGE_TAG}.tar.gz s3://$RELEASE_BUCKET/custom-wsl-latest.tar.gz
+        fi
+artifacts:
+  files:
+    - custom-wsl-*.tar.gz
+  discard-paths: yes
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'
