@@ -67,8 +67,8 @@ python3 -m pip install --upgrade pip setuptools wheel || true
 # Web dev tools
 # -------------------------
 echo "Installing Web Dev tools..."
-if [ -s "$HOME/.nvm/nvm.sh" ]; then
-  . "$HOME/.nvm/nvm.sh"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
   npm install -g yarn pnpm typescript vite webpack webpack-cli || true
 fi
 curl -fsSL https://code-server.dev/install.sh | sh || true
