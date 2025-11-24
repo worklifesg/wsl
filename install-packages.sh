@@ -127,6 +127,32 @@ unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install || true
 # azure cli
 curl -sL https://aka.ms/InstallAzureCLIDeb | bash || true
 
+# -------------------------
+# Infrastructure & DevOps
+# -------------------------
+echo "Installing Infrastructure tools..."
+
+# Terraform
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+apt-get update && apt-get install -y terraform || true
+
+# GitHub CLI (gh)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt-get update && apt-get install -y gh || true
+
+# yq (YAML processor)
+wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq || true
+
+# Modern Unix Tools
+apt-get install -y fzf ripgrep bat || true
+# bat is installed as batcat in ubuntu, alias it
+if [ -f /usr/bin/batcat ]; then
+    ln -s /usr/bin/batcat /usr/local/bin/bat || true
+fi
+
 # Final cleanup
 echo "Cleaning up..."
 apt-get autoremove -y

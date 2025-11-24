@@ -3,6 +3,42 @@
 ## Overview
 This repo builds a custom WSL rootfs (tarball) locally or via CI (CodeBuild/GitHub Actions) and uploads it to S3 for distribution.
 
+## Included Tools & Packages
+This custom WSL image comes pre-installed with a comprehensive suite of development tools:
+
+### Core Languages & Runtimes
+- **Node.js**: v22 (via `nvm`)
+- **Go**: v1.23.9
+- **Java**: OpenJDK 17 (or 11 fallback)
+- **Rust**: Installed via `rustup`
+- **Python**: Python 3 with `pip` and `venv`
+- **C/C++**: `build-essential`, `gcc`, `g++`, `clang`, `make`
+
+### Cloud & DevOps
+- **AWS**: AWS CLI v2
+- **Azure**: Azure CLI
+- **Docker**: Docker CLI (`docker.io`)
+- **Terraform**: HashiCorp Terraform
+- **Kubernetes**:
+  - `kubectl` (Latest stable)
+  - `helm` (Helm 3)
+  - `kustomize`
+  - `kind` (Kubernetes in Docker)
+  - `minikube`
+  - `k9s` (Terminal UI for K8s)
+- **Security**: `trivy` (Container security scanner)
+
+### Web Development
+- **Package Managers**: `npm`, `yarn`, `pnpm`
+- **Bundlers/Tools**: `typescript`, `vite`, `webpack`, `webpack-cli`
+- **IDE**: `code-server` (VS Code in the browser)
+
+### Utilities & Productivity
+- **Git**: `git` and `gh` (GitHub CLI)
+- **Data Processing**: `jq` (JSON), `yq` (YAML)
+- **Modern Unix Tools**: `fzf` (Fuzzy finder), `ripgrep` (rg), `bat` (cat clone)
+- **System**: `htop`, `curl`, `wget`, `unzip`, `zip`, `net-tools`, `iproute2`, `procps`
+
 ## Run locally (quick)
 On Ubuntu (or WSL host with sudo):
 1. sudo apt-get update
