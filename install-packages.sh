@@ -54,6 +54,7 @@ rm -rf /usr/local/go
 tar -C /usr/local -xzf /tmp/go.tar.gz
 # Overwrite /etc/profile.d/go.sh to ensure idempotency; using '>' avoids duplicate entries if the script is run multiple times.
 echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
+chmod +x /etc/profile.d/go.sh
 
 # -------------------------
 # Java & Rust & Python
