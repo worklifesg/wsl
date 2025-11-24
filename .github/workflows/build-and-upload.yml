@@ -34,6 +34,7 @@ jobs:
 
       - name: Upload artifact to S3
         run: |
+          set -e
           aws s3 cp custom-wsl-${{ env.IMAGE_TAG }}.tar.gz s3://${{ secrets.S3_BUCKET }}/
           aws s3 cp custom-wsl-latest.tar.gz s3://${{ secrets.S3_BUCKET }}/
 
