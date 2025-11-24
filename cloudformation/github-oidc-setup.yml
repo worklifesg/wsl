@@ -55,6 +55,7 @@ Resources:
             Condition:
               StringLike:
                 token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:*"
+              StringEquals:
                 token.actions.githubusercontent.com:aud: "sts.amazonaws.com"
       Policies:
         - PolicyName: S3Access

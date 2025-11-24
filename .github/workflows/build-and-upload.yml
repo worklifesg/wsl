@@ -27,12 +27,13 @@ jobs:
 
       - name: Tag and Rename
         run: |
-          export IMAGE_TAG="$(date +%Y%m%d)-${{ github.run_number }}"
+          IMAGE_TAG="$(date +%Y%m%d)-${{ github.run_number }}"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           mv custom-wsl.tar.gz custom-wsl-${IMAGE_TAG}.tar.gz
           cp custom-wsl-${IMAGE_TAG}.tar.gz custom-wsl-latest.tar.gz
 
       - name: Upload artifact to S3
         run: |
-          aws s3 cp custom-wsl-${IMAGE_TAG}.tar.gz s3://${{ secrets.S3_BUCKET }}/
+          aws s3 cp custom-wsl-${{ env.IMAGE_TAG }}.tar.gz s3://${{ secrets.S3_BUCKET }}/
           aws s3 cp custom-wsl-latest.tar.gz s3://${{ secrets.S3_BUCKET }}/
 

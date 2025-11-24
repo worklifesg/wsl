@@ -37,7 +37,7 @@ Option 2 — GitHub Actions (OIDC):
    - `AWS_ROLE_ARN`: The Role ARN from step 2.
    - `S3_BUCKET`: The Bucket Name from step 2.
    - `AWS_REGION`: Your AWS region (e.g., `us-east-1`).
-4. Push to `main` (or `develop`) to trigger the build. The workflow uses OIDC for secure, temporary credentials.
+4. Push to `main` to trigger the build. The workflow uses OIDC for secure, temporary credentials.
 
 ## Import on Windows:
 Use `windows/import-and-setup.ps1` to download & import. You can specify a version (default is "latest").
