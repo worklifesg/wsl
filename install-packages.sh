@@ -1,15 +1,13 @@
 #!/bin/bash
-set -e
-export DEBIAN_FRONTEND=noninteractive
-
-apt-get update
-apt-get upgrade -y || true
-
-# Core utilities
-#!/bin/bash
 # Script to install packages
 
 set -e
+export DEBIAN_FRONTEND=noninteractive
+
+# Update and Upgrade
+echo "Updating system..."
+apt-get update
+apt-get upgrade -y || true
 
 # Default packages
 PACKAGES="sudo curl wget git ca-certificates gnupg lsb-release apt-transport-https build-essential make gcc g++ clang python3 python3-pip python3-venv unzip zip jq htop net-tools iproute2 iputils-ping procps locales tzdata"
@@ -20,13 +18,15 @@ if [ -f /root/packages.txt ]; then
 fi
 
 echo "Installing packages: $PACKAGES"
+apt-get install -y "$PACKAGES"
 
-apt-get update && apt-get install -y $PACKAGES
-
+# Locale generation
+echo "Generating locales..."
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 
 # Create dev user
+echo "Creating devuser..."
 if ! id -u devuser >/dev/null 2>&1; then
   useradd -m -s /bin/bash devuser
   echo "devuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -35,10 +35,11 @@ fi
 # -------------------------
 # Node.js + nvm
 # -------------------------
+echo "Installing NVM and Node.js..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash || true
-export NVM_DIR="/root/.nvm"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-  . "$NVM_DIR/nvm.sh"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+if command -v nvm >/dev/null 2>&1; then
   nvm install 22 || true
   nvm alias default 22 || true
 fi
@@ -46,15 +47,19 @@ fi
 # -------------------------
 # Go
 # -------------------------
+echo "Installing Go..."
 GO_VER=1.23.9
 wget -q https://go.dev/dl/go${GO_VER}.linux-amd64.tar.gz -O /tmp/go.tar.gz
 rm -rf /usr/local/go
 tar -C /usr/local -xzf /tmp/go.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile.d/go.sh
+# Overwrite /etc/profile.d/go.sh to ensure idempotency. Using '>' avoids duplicate entries if the script is run multiple times.
+echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
+chmod +x /etc/profile.d/go.sh
 
 # -------------------------
 # Java & Rust & Python
 # -------------------------
+echo "Installing Java, Rust, Python..."
 apt-get install -y openjdk-17-jdk
 curl https://sh.rustup.rs -sSf | sh -s -- -y || true
 python3 -m pip install --upgrade pip setuptools wheel || true
@@ -62,7 +67,9 @@ python3 -m pip install --upgrade pip setuptools wheel || true
 # -------------------------
 # Web dev tools
 # -------------------------
-if command -v npm >/dev/null 2>&1; then
+echo "Installing Web Dev tools..."
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
   npm install -g yarn pnpm typescript vite webpack webpack-cli || true
 fi
 curl -fsSL https://code-server.dev/install.sh | sh || true
@@ -70,6 +77,7 @@ curl -fsSL https://code-server.dev/install.sh | sh || true
 # -------------------------
 # Kubernetes & cloud tools
 # -------------------------
+echo "Installing Cloud tools..."
 # kubectl
 curl -L --silent "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
 chmod +x /usr/local/bin/kubectl || true
@@ -91,6 +99,16 @@ chmod +x /usr/local/bin/minikube || true
 
 # k9s
 curl -sS https://webinstall.dev/k9s | bash || true
+# Move k9s to global path if installed locally
+if [ -f "$HOME/.local/bin/k9s" ]; then
+    # If /usr/local/bin/k9s exists, back it up before overwriting
+    if [ -f /usr/local/bin/k9s ]; then
+        echo "Warning: /usr/local/bin/k9s already exists. Backing up to /usr/local/bin/k9s.bak.$(date +%s)"
+        cp /usr/local/bin/k9s /usr/local/bin/k9s.bak.$(date +%s)
+    fi
+    # Overwrite is intentional to ensure latest version is globally accessible
+    mv "$HOME/.local/bin/k9s" /usr/local/bin/
+fi
 
 # trivy
 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin || true
@@ -106,6 +124,7 @@ unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install || true
 curl -sL https://aka.ms/InstallAzureCLIDeb | bash || true
 
 # Final cleanup
+echo "Cleaning up..."
 apt-get autoremove -y
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
