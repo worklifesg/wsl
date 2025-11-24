@@ -8,7 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Updating system..."
 apt-get update
 apt-get install -y software-properties-common
-add-apt-repository universe
+add-apt-repository -y universe
 apt-get update
 apt-get upgrade -y || true
 
@@ -39,6 +39,7 @@ fi
 # Node.js + nvm
 # -------------------------
 echo "Installing NVM and Node.js..."
+unset NVM_DIR
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash || true
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -63,7 +64,7 @@ chmod +x /etc/profile.d/go.sh
 # Java & Rust & Python
 # -------------------------
 echo "Installing Java, Rust, Python..."
-apt-get install -y openjdk-17-jdk
+apt-get install -y openjdk-17-jdk || apt-get install -y openjdk-11-jdk
 curl https://sh.rustup.rs -sSf | sh -s -- -y || true
 python3 -m pip install --upgrade pip setuptools wheel || true
 

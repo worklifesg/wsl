@@ -2,14 +2,23 @@ name: Build WSL and upload to S3
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       id-token: write
       contents: read
     steps:
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo apt-get clean
+
       - name: Checkout
         uses: actions/checkout@v4
 
